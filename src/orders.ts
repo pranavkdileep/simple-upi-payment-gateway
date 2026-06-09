@@ -2,26 +2,34 @@ export async function createOrder(
   requestedAmount: number,
   db: D1Database
 ): Promise<{ amount: number; orderId: number }> {
-  const baseAmount = Math.round(requestedAmount * 100) / 100;
-  const maxAmount = baseAmount + 1.00;
-  let currentAmount = baseAmount;
+  const basePaise = Math.round(requestedAmount * 100);
 
-  while (currentAmount <= maxAmount + 0.0001) {
-    const rounded = Math.round(currentAmount * 100) / 100;
+  const result = await db.prepare(
+    `WITH RECURSIVE slots(offset) AS (
+      SELECT 0
+      UNION ALL
+      SELECT offset + 1 FROM slots WHERE offset < 100
+    ),
+    available AS (
+      SELECT ? + offset AS amount_paise
+      FROM slots
+      WHERE NOT EXISTS (
+        SELECT 1
+        FROM Orders
+        WHERE status = 'waiting'
+          AND CAST(ROUND(amount * 100) AS INTEGER) = ? + offset
+      )
+      ORDER BY offset
+      LIMIT 1
+    )
+    INSERT INTO Orders (amount, status)
+    SELECT amount_paise / 100.0, 'waiting' FROM available
+    RETURNING amount, order_id`
+  ).bind(basePaise, basePaise).first<{ amount: number; order_id: number }>();
 
-    const existing = await db.prepare(
-      `SELECT 1 FROM Orders WHERE amount = ? AND status = 'waiting' LIMIT 1`
-    ).bind(rounded).first();
-
-    if (!existing) {
-      const result = await db.prepare(
-        `INSERT INTO Orders (amount, status) VALUES (?, 'waiting') RETURNING order_id`
-      ).bind(rounded).first<{ order_id: number }>();
-      return { amount: rounded, orderId: result!.order_id };
-    }
-
-    currentAmount = Math.round((currentAmount + 0.01) * 100) / 100;
+  if (!result) {
+    throw new Error("No payment slots available. Please retry after a few minutes.");
   }
 
-  throw new Error("No payment slots available. Please retry after a few minutes.");
+  return { amount: result.amount, orderId: result.order_id };
 }

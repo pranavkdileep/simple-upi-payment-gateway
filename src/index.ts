@@ -11,7 +11,7 @@ interface CloudflareBindings {
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
 app.get("/message", (c) => {
-  return c.text("Hello Hono!");
+  return c.text("Hello Hono!!");
 });
 
 app.post("/api/create-order", async (c) => {
@@ -32,7 +32,7 @@ export default {
 
   async email(message: ForwardableEmailMessage, env: any, ctx: ExecutionContext) {
     try {
-      
+
       const rawBuffer = await new Response(message.raw).arrayBuffer();
       const parsedMime = await new PostalMime().parse(rawBuffer);
       const sender = parsedMime.from?.address || "Unknown Sender";
@@ -59,53 +59,53 @@ export default {
         message.setReject("Missing required transaction details.");
         return;
       }
-      else if (parsed.amount <= 0 || !/^\d{12}$/.test(parsed.rrn) || isNaN(Date.parse(parsed.date.toISOString()))) {
+      else if (parsed.amount <= 0 || !parsed.rrn || isNaN(Date.parse(parsed.date.toISOString()))) {
         logToD1(env.prod_d1_db_slice_upi_gateway, "Invalid transaction details.", "Rejected");
         message.setReject("Invalid transaction.");
         return;
       }
-      // save to payments table 
-      env.prod_d1_db_slice_upi_gateway.prepare(`INSERT INTO Payments (amount, uid, payer_name) VALUES (?, ?, ?)`)
-        .bind(parsed.amount, parsed.rrn, parsed.name)
+      const db = env.prod_d1_db_slice_upi_gateway;
+      const payment = await db.prepare(
+        `INSERT INTO Payments (amount, uid, payer_name) VALUES (?, ?, ?) RETURNING payment_id`
+      ).bind(parsed.amount, parsed.rrn, parsed.name).first<{ payment_id: number }>();
+
+      const amountPaise = Math.round(parsed.amount * 100);
+      const matchingOrder = await db.prepare(
+        `SELECT order_id FROM Orders
+        WHERE status = 'waiting'
+          AND CAST(ROUND(amount * 100) AS INTEGER) = ?
+        ORDER BY created_at ASC
+        LIMIT 1`
+      ).bind(amountPaise).first<{ order_id: number }>();
+
+      if (!matchingOrder) {
+        await db.prepare(`UPDATE Payments SET note = 'no_matching_order' WHERE payment_id = ?`)
+          .bind(payment!.payment_id)
+          .run();
+        await logToD1(db, `No waiting order found for amount ${parsed.amount}`, "NoMatch");
+        return;
+      }
+
+      const updatedOrder = await db.prepare(
+        `UPDATE Orders
+        SET status = 'success', uid = ?, payer_name = ?, paid_at = datetime('now')
+        WHERE order_id = ? AND status = 'waiting'
+        RETURNING order_id`
+      ).bind(parsed.rrn, parsed.name, matchingOrder.order_id).first<{ order_id: number }>();
+
+      if (!updatedOrder) {
+        await db.prepare(`UPDATE Payments SET note = 'order_update_failed' WHERE payment_id = ?`)
+          .bind(payment!.payment_id)
+          .run();
+        throw new Error(`Failed to update order ${matchingOrder.order_id}`);
+      }
+
+      await db.prepare(`UPDATE Payments SET matched_order_id = ? WHERE payment_id = ?`)
+        .bind(updatedOrder.order_id, payment!.payment_id)
         .run();
 
-      const updatedOrder = env.prod_d1_db_slice_upi_gateway.prepare(
-        `WITH matching_orders AS (
-          SELECT id FROM orders 
-          WHERE status = 'waiting' AND amount = ?
-        ),
-        order_count AS (
-          SELECT COUNT(*) as cnt FROM matching_orders
-        ),
-        update_single AS (
-          UPDATE orders 
-          SET status = 'success', uid = ?, payer_name = ?, paid_at = datetime('now')
-          WHERE status = 'waiting' AND amount = ? AND id IN (
-            SELECT id FROM matching_orders WHERE (SELECT cnt FROM order_count) = 1
-          )
-          RETURNING id
-        ),
-        mark_ambiguous AS (
-          UPDATE Payments
-          SET note = 'ambiguous'
-          WHERE uid = ? AND (SELECT cnt FROM order_count) > 1
-          RETURNING 1 as dummy
-        ),
-        update_payment_with_order AS (
-          UPDATE Payments
-          SET matched_order_id = (SELECT id FROM update_single LIMIT 1)
-          WHERE uid = ? AND (SELECT cnt FROM order_count) = 1
-          RETURNING 1 as dummy
-        )
-        SELECT 
-          CASE 
-            WHEN (SELECT cnt FROM order_count) = 1 THEN (SELECT id FROM update_single LIMIT 1)
-            ELSE NULL
-          END as orderId`
-      ).bind(parsed.amount, parsed.rrn, parsed.name, parsed.amount, parsed.rrn, parsed.rrn)
-      .first()
-
-      await message.forward("pkdartyt@gmail.com")
+      await logToD1(db, `Order ${updatedOrder.order_id} updated successfully.`, "Success");
+      // await message.forward("pkdartyt@gmail.com")
     } catch (error) {
       logToD1(env.prod_d1_db_slice_upi_gateway, error as string, "Error");
       console.error("Email forwarding failed:", error)
