@@ -3,6 +3,7 @@
 // Runtime types generated with workerd@1.20260603.1 2026-06-08 nodejs_compat
 interface __BaseEnv_CloudflareBindings {
 	ASSETS: Fetcher;
+    prod_d1_db_slice_upi_gateway: D1Database;
 }
 declare namespace Cloudflare {
 	interface GlobalProps {

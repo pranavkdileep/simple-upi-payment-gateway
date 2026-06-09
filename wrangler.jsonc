@@ -17,6 +17,14 @@
 	"upload_source_maps": true,
 	"compatibility_flags": [
 		"nodejs_compat"
+	],
+	"d1_databases": [
+		{
+			"binding": "prod_d1_db_slice_upi_gateway",
+			"database_name": "prod-d1-db-slice-upi-gateway",
+			"database_id": "84c3d8ef-6e9c-4f69-9044-12a01550215c",
+			"remote": true
+		}
 	]
 	/**
 	 * Smart Placement
