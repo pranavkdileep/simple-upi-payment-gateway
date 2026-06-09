@@ -10,13 +10,21 @@ interface CloudflareBindings {
   sclice_upi_gateway_namespace: KVNamespace;
 }
 
+async function requireAuth(c: any, next: any) {
+  const secret = await c.env.sclice_upi_gateway_namespace.get("api_secret");
+  if (!secret) return c.json({ error: "API secret not configured" }, 500);
+  const header = c.req.header("Authorization");
+  if (header !== `Bearer ${secret}`) return c.json({ error: "Unauthorized" }, 401);
+  return next();
+}
+
 const app = new Hono<{ Bindings: CloudflareBindings }>();
 
 app.get("/message", (c) => {
   return c.text("Hello Hono!!");
 });
 
-app.post("/api/create-order", async (c) => {
+app.post("/api/create-order", requireAuth, async (c) => {
   try {
     const { amount } = await c.req.json<{ amount: number }>();
     if (typeof amount !== "number" || amount <= 0) {
@@ -29,7 +37,7 @@ app.post("/api/create-order", async (c) => {
   }
 });
 
-app.post("/api/timeout-orders", async (c) => {
+app.post("/api/timeout-orders", requireAuth, async (c) => {
   const db = c.env.prod_d1_db_slice_upi_gateway;
   const result = await db.prepare(
     `UPDATE Orders
@@ -46,7 +54,7 @@ app.post("/api/timeout-orders", async (c) => {
   return c.json({ timedOut: orders.length, orderIds: orders.map(r => r.order_id) });
 });
 
-app.get("/api/order/:id", async (c) => {
+app.get("/api/order/:id", requireAuth, async (c) => {
   const id = c.req.param("id");
   const order = await c.env.prod_d1_db_slice_upi_gateway.prepare(
     `SELECT * FROM Orders WHERE order_id = ?`

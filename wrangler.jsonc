@@ -32,7 +32,7 @@
 			"id": "34886348c8524a5c86e24ae3d4c8db19",
 			"remote": true
 		}
-	]
+	],
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement
@@ -50,7 +50,10 @@
 	 * Note: Use secrets to store sensitive data.
 	 * https://developers.cloudflare.com/workers/configuration/secrets/
 	 */
-	// "vars": {  "MY_VARIABLE": "production_value" }
+	"vars": {
+		"USERNAME": "pkd",
+		"PASSWORD": "pkd",
+	}
 	/**
 	 * Service Bindings (communicate between multiple Workers)
 	 * https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
