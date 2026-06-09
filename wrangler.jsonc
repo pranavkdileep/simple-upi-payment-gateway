@@ -25,6 +25,13 @@
 			"database_id": "84c3d8ef-6e9c-4f69-9044-12a01550215c",
 			"remote": true
 		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "sclice_upi_gateway_namespace",
+			"id": "34886348c8524a5c86e24ae3d4c8db19",
+			"remote": true
+		}
 	]
 	/**
 	 * Smart Placement

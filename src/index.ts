@@ -6,6 +6,7 @@ import { createOrder } from "./orders";
 
 interface CloudflareBindings {
   prod_d1_db_slice_upi_gateway: D1Database;
+  slice_upi_gateway_namespace: KVNamespace;
 }
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
