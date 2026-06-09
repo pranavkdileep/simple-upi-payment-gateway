@@ -30,7 +30,7 @@ app.post("/api/create-order", async (c) => {
 export default {
   fetch: app.fetch,
 
-  async email(message: ForwardableEmailMessage, env: any, ctx: ExecutionContext) {
+  async email(message: ForwardableEmailMessage, env: CloudflareBindings, ctx: ExecutionContext) {
     try {
 
       const rawBuffer = await new Response(message.raw).arrayBuffer();
