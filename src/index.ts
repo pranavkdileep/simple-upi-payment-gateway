@@ -3,10 +3,11 @@ import { parseSliceEmail } from "./parser";
 import PostalMime from "postal-mime";
 import { logToD1 } from "./log";
 import { createOrder } from "./orders";
+import { fireWebhook } from "./webhook";
 
 interface CloudflareBindings {
   prod_d1_db_slice_upi_gateway: D1Database;
-  slice_upi_gateway_namespace: KVNamespace;
+  sclice_upi_gateway_namespace: KVNamespace;
 }
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
@@ -21,7 +22,7 @@ app.post("/api/create-order", async (c) => {
     if (typeof amount !== "number" || amount <= 0) {
       return c.json({ error: "Invalid amount." }, 400);
     }
-    const result = await createOrder(amount, c.env.prod_d1_db_slice_upi_gateway);
+    const result = await createOrder(amount, c.env.prod_d1_db_slice_upi_gateway, c.env.sclice_upi_gateway_namespace);
     return c.json(result);
   } catch (e: any) {
     return c.json({ error: e.message }, 409);
@@ -35,9 +36,14 @@ app.post("/api/timeout-orders", async (c) => {
      SET status = 'timeout'
      WHERE status = 'waiting'
        AND CAST(julianday('now') - julianday(created_at) AS REAL) * 24 * 60 >= 10
-     RETURNING order_id`
+     RETURNING *`
   ).all();
-  return c.json({ timedOut: result.results.length, orderIds: result.results.map(r => r.order_id) });
+  const orders = result.results as any[];
+  for (const order of orders) {
+    if (!c.env.sclice_upi_gateway_namespace) continue;
+    await fireWebhook(c.env.sclice_upi_gateway_namespace, "order.timeout", { order });
+  }
+  return c.json({ timedOut: orders.length, orderIds: orders.map(r => r.order_id) });
 });
 
 app.get("/api/order/:id", async (c) => {
@@ -47,6 +53,14 @@ app.get("/api/order/:id", async (c) => {
   ).bind(id).first();
   if (!order) return c.json({ error: "Order not found" }, 404);
   return c.json(order);
+});
+
+app.post("/api/test-webhook", async (c) => {
+  if (!c.env.sclice_upi_gateway_namespace) {
+    return c.json({ error: "Webhook namespace not configured" }, 500);
+  }
+  await fireWebhook(c.env.sclice_upi_gateway_namespace, "test", { message: "Webhook test" });
+  return c.json({ ok: true });
 });
 
 export default {
@@ -125,6 +139,12 @@ export default {
       await db.prepare(`UPDATE Payments SET matched_order_id = ? WHERE payment_id = ?`)
         .bind(updatedOrder.order_id, payment!.payment_id)
         .run();
+
+      if (env.sclice_upi_gateway_namespace) {
+        await fireWebhook(env.sclice_upi_gateway_namespace, "order.success", {
+          order: { order_id: updatedOrder.order_id, amount: parsed.amount, status: "success", paid_at: new Date().toISOString() }
+        });
+      }
 
       await logToD1(db, `Order ${updatedOrder.order_id} updated successfully.`, "Success");
       // await message.forward("pkdartyt@gmail.com")

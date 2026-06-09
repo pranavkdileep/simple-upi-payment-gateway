@@ -1,7 +1,8 @@
 export async function createOrder(
   requestedAmount: number,
-  db: D1Database
-): Promise<{ amount: number; orderId: number }> {
+  db: D1Database,
+  kv: KVNamespace
+): Promise<{ amount: number; orderId: number; upiIntent: string }> {
   const basePaise = Math.round(requestedAmount * 100);
 
   const result = await db.prepare(
@@ -31,5 +32,13 @@ export async function createOrder(
     throw new Error("No payment slots available. Please retry after a few minutes.");
   }
 
-  return { amount: result.amount, orderId: result.order_id };
+  const upiId = await kv.get("upi_id");
+  if (!upiId) {
+    throw new Error("UPI ID not configured.");
+  }
+
+  const note = `ORDER${result.order_id}`;
+  const upiIntent = `upi://pay?pa=${encodeURIComponent(upiId)}&am=${result.amount}&tn=${encodeURIComponent(note)}&cu=INR`;
+
+  return { amount: result.amount, orderId: result.order_id, upiIntent };
 }
