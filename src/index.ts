@@ -39,6 +39,15 @@ app.post("/api/timeout-orders", async (c) => {
   return c.json({ timedOut: result.results.length, orderIds: result.results.map(r => r.order_id) });
 });
 
+app.get("/api/order/:id", async (c) => {
+  const id = c.req.param("id");
+  const order = await c.env.prod_d1_db_slice_upi_gateway.prepare(
+    `SELECT * FROM Orders WHERE order_id = ?`
+  ).bind(id).first();
+  if (!order) return c.json({ error: "Order not found" }, 404);
+  return c.json(order);
+});
+
 export default {
   fetch: app.fetch,
 
