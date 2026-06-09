@@ -4,10 +4,13 @@ import PostalMime from "postal-mime";
 import { logToD1 } from "./log";
 import { createOrder } from "./orders";
 import { fireWebhook } from "./webhook";
+import { registerDashboardRoutes } from "./dashboard";
 
 interface CloudflareBindings {
   prod_d1_db_slice_upi_gateway: D1Database;
   sclice_upi_gateway_namespace: KVNamespace;
+  USERNAME: string;
+  PASSWORD: string;
 }
 
 async function requireAuth(c: any, next: any) {
@@ -19,6 +22,8 @@ async function requireAuth(c: any, next: any) {
 }
 
 const app = new Hono<{ Bindings: CloudflareBindings }>();
+
+registerDashboardRoutes(app);
 
 app.get("/message", (c) => {
   return c.text("Hello Hono!!");
