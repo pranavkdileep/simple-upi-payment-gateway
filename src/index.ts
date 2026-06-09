@@ -27,6 +27,18 @@ app.post("/api/create-order", async (c) => {
   }
 });
 
+app.post("/api/timeout-orders", async (c) => {
+  const db = c.env.prod_d1_db_slice_upi_gateway;
+  const result = await db.prepare(
+    `UPDATE Orders
+     SET status = 'timeout'
+     WHERE status = 'waiting'
+       AND CAST(julianday('now') - julianday(created_at) AS REAL) * 24 * 60 >= 10
+     RETURNING order_id`
+  ).all();
+  return c.json({ timedOut: result.results.length, orderIds: result.results.map(r => r.order_id) });
+});
+
 export default {
   fetch: app.fetch,
 
