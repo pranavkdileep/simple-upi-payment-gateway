@@ -50,7 +50,46 @@ export default {
         message.setReject("Invalid transaction.");
         return;
       }
-      logToD1(env.prod_d1_db_slice_upi_gateway, JSON.stringify(parsed), "Received");
+      // save to payments table 
+      env.prod_d1_db_slice_upi_gateway.prepare(`INSERT INTO Payments (amount, uid, payer_name) VALUES (?, ?, ?)`)
+        .bind(parsed.amount, parsed.rrn, parsed.name)
+        .run();
+
+      const updatedOrder = env.prod_d1_db_slice_upi_gateway.prepare(
+        `WITH matching_orders AS (
+          SELECT id FROM orders 
+          WHERE status = 'waiting' AND amount = ?
+        ),
+        order_count AS (
+          SELECT COUNT(*) as cnt FROM matching_orders
+        ),
+        update_single AS (
+          UPDATE orders 
+          SET status = 'success', uid = ?, payer_name = ?, paid_at = datetime('now')
+          WHERE status = 'waiting' AND amount = ? AND id IN (
+            SELECT id FROM matching_orders WHERE (SELECT cnt FROM order_count) = 1
+          )
+          RETURNING id
+        ),
+        mark_ambiguous AS (
+          UPDATE Payments
+          SET note = 'ambiguous'
+          WHERE uid = ? AND (SELECT cnt FROM order_count) > 1
+          RETURNING 1 as dummy
+        ),
+        update_payment_with_order AS (
+          UPDATE Payments
+          SET matched_order_id = (SELECT id FROM update_single LIMIT 1)
+          WHERE uid = ? AND (SELECT cnt FROM order_count) = 1
+          RETURNING 1 as dummy
+        )
+        SELECT 
+          CASE 
+            WHEN (SELECT cnt FROM order_count) = 1 THEN (SELECT id FROM update_single LIMIT 1)
+            ELSE NULL
+          END as orderId`
+      ).bind(parsed.amount, parsed.rrn, parsed.name, parsed.amount, parsed.rrn, parsed.rrn)
+      .first()
 
       await message.forward("pkdartyt@gmail.com")
     } catch (error) {

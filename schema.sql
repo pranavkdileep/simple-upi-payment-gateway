@@ -14,7 +14,7 @@ CREATE TABLE Logs (
 );
 
 CREATE TABLE Orders (
-    order_id TEXT PRIMARY KEY,
+    order_id INTEGER PRIMARY KEY AUTOINCREMENT,
     amount NUMERIC NOT NULL,
     status TEXT NOT NULL CHECK (status IN ('waiting', 'success', 'timeout')),
     created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -25,14 +25,16 @@ CREATE TABLE Orders (
 
 CREATE INDEX idx_orders_uid ON Orders(uid);
 CREATE INDEX idx_orders_status ON Orders(status);
+CREATE UNIQUE INDEX idx_orders_amount_waiting ON Orders(amount) WHERE status = 'waiting';
 
 CREATE TABLE Payments (
-    payment_id TEXT PRIMARY KEY,
+    payment_id INTEGER PRIMARY KEY AUTOINCREMENT,
     amount NUMERIC NOT NULL,
     uid TEXT NOT NULL UNIQUE,
     payer_name TEXT NOT NULL,
     received_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    matched_order_id TEXT NULL,
+    note TEXT NULL,
+    matched_order_id INTEGER NULL,
     FOREIGN KEY (matched_order_id) REFERENCES Orders(order_id) ON DELETE SET NULL ON UPDATE CASCADE
 );
 
