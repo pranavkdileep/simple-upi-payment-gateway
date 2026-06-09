@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { parseSliceEmail } from "./parser";
 import PostalMime from "postal-mime";
 import { logToD1 } from "./log";
+import { createOrder } from "./orders";
 
 interface CloudflareBindings {
   prod_d1_db_slice_upi_gateway: D1Database;
@@ -11,6 +12,19 @@ const app = new Hono<{ Bindings: CloudflareBindings }>();
 
 app.get("/message", (c) => {
   return c.text("Hello Hono!");
+});
+
+app.post("/api/create-order", async (c) => {
+  try {
+    const { amount } = await c.req.json<{ amount: number }>();
+    if (typeof amount !== "number" || amount <= 0) {
+      return c.json({ error: "Invalid amount." }, 400);
+    }
+    const result = await createOrder(amount, c.env.prod_d1_db_slice_upi_gateway);
+    return c.json(result);
+  } catch (e: any) {
+    return c.json({ error: e.message }, 409);
+  }
 });
 
 export default {
