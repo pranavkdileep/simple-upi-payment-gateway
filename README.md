@@ -61,6 +61,14 @@ Deploy to Cloudflare:
 npm run deploy
 ```
 
+Create KV namespace and D1 database
+
+```txt
+npx wrangler@latest d1 create prod-d1-db-slice-upi-gateway
+npx wrangler d1 execute prod-d1-db-slice-upi-gateway --remote --file=./schema.sql
+npx wrangler kv namespace create sclice-upi-gateway-namespace
+```
+
 Generate Cloudflare binding types:
 
 ```txt
