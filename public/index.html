@@ -12,7 +12,7 @@
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link
-			href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+			href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap"
 			rel="stylesheet"
 		/>
 		<style>
@@ -40,6 +40,16 @@
 
 			html {
 				scroll-behavior: smooth;
+			}
+
+			img,
+			iframe,
+			svg {
+				max-width: 100%;
+			}
+
+			section {
+				scroll-margin-top: 24px;
 			}
 
 			body {
@@ -119,6 +129,13 @@
 				padding: 26px 32px 0;
 			}
 
+			.topbar > *,
+			.demo-card > *,
+			.info-grid > *,
+			.work-card > * {
+				min-width: 0;
+			}
+
 			.brand {
 				display: inline-flex;
 				align-items: center;
@@ -161,6 +178,8 @@
 			.nav-links {
 				display: flex;
 				align-items: center;
+				flex-wrap: wrap;
+				justify-content: center;
 				gap: 26px;
 				padding: 0 8px;
 				font-size: 0.95rem;
@@ -762,6 +781,7 @@
 				border-radius: 22px;
 				background: rgba(255, 255, 255, 0.68);
 				box-shadow: var(--shadow-soft);
+				overflow-wrap: anywhere;
 			}
 
 			.info-card h3 {
@@ -789,8 +809,7 @@
 			}
 
 			.inline-code {
-				display: inline-flex;
-				align-items: center;
+				display: inline;
 				padding: 2px 8px;
 				border-radius: 999px;
 				background: rgba(79, 70, 229, 0.1);
@@ -798,7 +817,11 @@
 				font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, monospace;
 				font-size: 0.86rem;
 				font-weight: 700;
-				white-space: nowrap;
+				line-height: 1.9;
+				overflow-wrap: anywhere;
+				word-break: break-word;
+				-webkit-box-decoration-break: clone;
+				box-decoration-break: clone;
 			}
 
 			.setup-note {
@@ -831,6 +854,7 @@
 				border-radius: 22px;
 				background: rgba(255, 255, 255, 0.68);
 				box-shadow: var(--shadow-soft);
+				overflow-wrap: anywhere;
 			}
 
 			.work-step {
@@ -951,7 +975,7 @@
 					order: 3;
 					width: 100%;
 					justify-content: center;
-					gap: 18px;
+					gap: 12px 18px;
 					padding: 12px 0 0;
 					font-size: 0.92rem;
 				}
@@ -1025,40 +1049,264 @@
 			}
 
 			@media (max-width: 620px) {
+				body {
+					background:
+						radial-gradient(circle at 0 4%, rgba(90, 73, 255, 0.86), transparent 24rem),
+						radial-gradient(circle at 100% 22%, rgba(160, 242, 223, 0.78), transparent 24rem),
+						linear-gradient(150deg, #6555e9 0%, #a9e3d7 58%, #ddd7f2 100%);
+				}
+
 				.page {
 					width: calc(100% - 12px);
 					margin: 6px auto 12px;
 					border-radius: 24px;
+					box-shadow: 0 18px 46px rgba(32, 36, 82, 0.16);
+				}
+
+				.topbar {
+					display: grid;
+					grid-template-columns: minmax(0, 1fr) auto;
+					align-items: center;
+					gap: 12px;
+					padding: 16px 14px 0;
+				}
+
+				.brand {
+					gap: 10px;
+				}
+
+				.brand-mark {
+					width: 38px;
+					height: 38px;
+				}
+
+				.brand-copy strong {
+					font-size: 1rem;
 				}
 
 				.brand-copy span {
-					font-size: 0.82rem;
+					display: none;
+				}
+
+				.nav-cta {
+					min-height: 40px;
+					padding: 0 14px;
+					font-size: 0.84rem;
+				}
+
+				.nav-links {
+					grid-column: 1 / -1;
+					display: grid;
+					grid-template-columns: repeat(3, minmax(0, 1fr));
+					gap: 6px;
+					padding-top: 4px;
+					font-size: 0.76rem;
+				}
+
+				.nav-links a {
+					display: grid;
+					place-items: center;
+					min-height: 36px;
+					padding: 6px 4px;
+					border: 1px solid rgba(17, 24, 39, 0.06);
+					border-radius: 12px;
+					background: rgba(255, 255, 255, 0.52);
+					text-align: center;
+				}
+
+				.nav-links a::after {
+					display: none;
 				}
 
 				.hero {
-					padding-top: 36px;
+					padding: 34px 14px 24px;
+				}
+
+				.hero h1 {
+					margin-top: 22px;
+					font-size: clamp(2.35rem, 12vw, 3.35rem);
+					line-height: 0.98;
+					letter-spacing: -0.065em;
 				}
 
 				.hero-pill {
+					max-width: 100%;
 					font-size: 0.8rem;
+					line-height: 1.35;
+					text-align: left;
+				}
+
+				.lead {
+					margin-top: 18px;
+					font-size: 0.94rem;
+					line-height: 1.6;
 				}
 
 				.hero-actions {
 					flex-direction: column;
 					align-items: stretch;
+					margin-top: 24px;
 				}
 
 				.btn {
 					width: 100%;
+					min-height: 48px;
+					padding-inline: 16px;
 				}
 
 				.hero-badge {
 					min-width: calc(50% - 6px);
 					flex: 1 1 0;
+					padding: 11px 12px;
 				}
 
 				.preview-head h2 {
 					font-size: clamp(1.45rem, 7vw, 2rem);
+				}
+
+				.preview,
+				.demo,
+				.features,
+				.info-section {
+					padding-right: 12px;
+					padding-bottom: 16px;
+					padding-left: 12px;
+				}
+
+				.preview-card,
+				.demo-card,
+				.info-shell {
+					padding: 14px;
+					border-radius: 20px;
+				}
+
+				.preview-copy,
+				.demo-text,
+				.info-head p,
+				.feature-card p,
+				.info-card p,
+				.info-list,
+				.work-card p {
+					font-size: 0.9rem;
+					line-height: 1.6;
+				}
+
+				.dashboard-shot,
+				.demo-player {
+					margin-top: 18px;
+					border-radius: 16px;
+				}
+
+				.demo-player {
+					margin-top: 0;
+				}
+
+				.demo-copy {
+					gap: 14px;
+					padding: 0;
+				}
+
+				.demo-actions {
+					align-items: stretch;
+					flex-direction: column;
+				}
+
+				.feature-card,
+				.info-card {
+					padding: 18px;
+					border-radius: 18px;
+				}
+
+				.info-head {
+					gap: 12px;
+					margin-bottom: 14px;
+				}
+
+				.info-head h2,
+				.demo-copy h2 {
+					font-size: clamp(1.4rem, 7vw, 1.9rem);
+				}
+
+				.info-list {
+					padding-left: 16px;
+					gap: 8px;
+				}
+
+				.inline-code {
+					font-size: 0.78rem;
+				}
+
+				.setup-note {
+					padding: 12px;
+					border-radius: 14px;
+					font-size: 0.86rem;
+				}
+
+				.work-card {
+					grid-template-columns: 40px minmax(0, 1fr);
+					gap: 12px;
+					padding: 16px;
+					border-radius: 18px;
+				}
+
+				.work-step {
+					width: 40px;
+					height: 40px;
+					border-radius: 13px;
+				}
+
+				.footer {
+					padding: 2px 14px 24px;
+					font-size: 0.86rem;
+				}
+			}
+
+			@media (max-width: 380px) {
+				.page {
+					width: calc(100% - 8px);
+					margin-top: 4px;
+					border-radius: 20px;
+				}
+
+				.topbar {
+					padding-inline: 12px;
+				}
+
+				.brand-mark {
+					width: 34px;
+					height: 34px;
+				}
+
+				.brand-copy strong {
+					font-size: 0.9rem;
+				}
+
+				.nav-cta {
+					min-height: 36px;
+					padding-inline: 11px;
+					font-size: 0.78rem;
+				}
+
+				.nav-links {
+					font-size: 0.71rem;
+				}
+
+				.hero h1 {
+					font-size: 2.25rem;
+				}
+
+				.hero-badges {
+					display: grid;
+					grid-template-columns: 1fr;
+				}
+
+				.hero-badge {
+					width: 100%;
+					min-width: 0;
+				}
+
+				.work-card {
+					grid-template-columns: 1fr;
 				}
 			}
 		</style>
@@ -1091,7 +1339,7 @@
 
 				<a
 					class="nav-cta"
-					href="https://api.whatsapp.com/send?phone=919544047655&text=setup%20payment%20gateway"
+					href="https://api.whatsapp.com/send?phone=919544047655&amp;text=setup%20payment%20gateway"
 					rel="noreferrer"
 				>
 					Get Started
@@ -1140,7 +1388,7 @@
 					<div class="hero-actions">
 						<a
 							class="btn btn-primary"
-							href="https://api.whatsapp.com/send?phone=919544047655&text=setup%20payment%20gateway"
+							href="https://api.whatsapp.com/send?phone=919544047655&amp;text=setup%20payment%20gateway"
 							rel="noreferrer"
 						>
 							<span>Start Building</span>
@@ -1230,7 +1478,7 @@
 
 					<div class="demo-player">
 						<iframe
-							src="https://www.youtube.com/embed/43BpRzuCQZo?rel=0&modestbranding=1"
+							src="https://www.youtube.com/embed/43BpRzuCQZo?rel=0&amp;modestbranding=1"
 							title="UPI Gateway demo video"
 							loading="lazy"
 							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -1427,7 +1675,7 @@
 			<footer class="footer" id="contact">
 				<span>Need help launching?</span>
 				<a
-					href="https://api.whatsapp.com/send?phone=919544047655&text=setup%20payment%20gateway"
+					href="https://api.whatsapp.com/send?phone=919544047655&amp;text=setup%20payment%20gateway"
 					rel="noreferrer"
 				>
 					Chat on WhatsApp
