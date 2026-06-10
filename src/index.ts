@@ -54,7 +54,7 @@ app.post("/api/timeout-orders", requireAuth, async (c) => {
   const orders = result.results as any[];
   for (const order of orders) {
     if (!c.env.sclice_upi_gateway_namespace) continue;
-    await fireWebhook(c.env.sclice_upi_gateway_namespace, "order.timeout", { order });
+    await fireWebhook(c.env.sclice_upi_gateway_namespace, c.env.prod_d1_db_slice_upi_gateway, "order.timeout", { order });
   }
   return c.json({ timedOut: orders.length, orderIds: orders.map(r => r.order_id) });
 });
@@ -72,7 +72,7 @@ app.post("/api/test-webhook", async (c) => {
   if (!c.env.sclice_upi_gateway_namespace) {
     return c.json({ error: "Webhook namespace not configured" }, 500);
   }
-  await fireWebhook(c.env.sclice_upi_gateway_namespace, "test", { message: "Webhook test" });
+  await fireWebhook(c.env.sclice_upi_gateway_namespace, c.env.prod_d1_db_slice_upi_gateway, "test", { message: "Webhook test" });
   return c.json({ ok: true });
 });
 
@@ -154,7 +154,7 @@ export default {
         .run();
 
       if (env.sclice_upi_gateway_namespace) {
-        await fireWebhook(env.sclice_upi_gateway_namespace, "order.success", {
+        await fireWebhook(env.sclice_upi_gateway_namespace, env.prod_d1_db_slice_upi_gateway, "order.success", {
           order: { order_id: updatedOrder.order_id, amount: parsed.amount, status: "success", paid_at: new Date().toISOString() }
         });
       }

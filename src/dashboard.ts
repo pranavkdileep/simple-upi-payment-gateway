@@ -306,7 +306,7 @@ export function registerDashboardRoutes(app: any) {
       const orders = result.results as any[];
       for (const order of orders) {
         if (!c.env.sclice_upi_gateway_namespace) continue;
-        await fireWebhook(c.env.sclice_upi_gateway_namespace, "order.timeout", { order });
+        await fireWebhook(c.env.sclice_upi_gateway_namespace, c.env.prod_d1_db_slice_upi_gateway, "order.timeout", { order });
       }
 
     
