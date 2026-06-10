@@ -3,17 +3,1436 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Hello, World!</title>
+		<meta
+			name="description"
+			content="UPI Gateway landing page for individual Slice UPI setups, dashboard visibility, and webhook-driven payment flows."
+		/>
+		<meta name="theme-color" content="#5b49ef" />
+		<title>UPI Gateway</title>
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link
+			href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+			rel="stylesheet"
+		/>
+		<style>
+			:root {
+				color-scheme: light;
+				--bg-left: #5c49f0;
+				--bg-right: #d8d3f3;
+				--bg-mint: #9fe4d3;
+				--bg-gold: #ffe18d;
+				--surface: rgba(255, 255, 255, 0.75);
+				--surface-strong: rgba(255, 255, 255, 0.95);
+				--surface-soft: rgba(255, 255, 255, 0.62);
+				--text: #111827;
+				--muted: #667085;
+				--muted-strong: #475467;
+				--line: rgba(17, 24, 39, 0.08);
+				--shadow: 0 30px 90px rgba(32, 36, 82, 0.18);
+				--shadow-soft: 0 18px 40px rgba(31, 41, 55, 0.08);
+				--accent: #4f46e5;
+			}
+
+			* {
+				box-sizing: border-box;
+			}
+
+			html {
+				scroll-behavior: smooth;
+			}
+
+			body {
+				margin: 0;
+				min-height: 100vh;
+				position: relative;
+				isolation: isolate;
+				overflow-x: hidden;
+				font-family: "Plus Jakarta Sans", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+				color: var(--text);
+				background:
+					radial-gradient(circle at 12% 16%, rgba(90, 73, 255, 0.95), transparent 24%),
+					radial-gradient(circle at 86% 10%, rgba(160, 242, 223, 0.88), transparent 22%),
+					radial-gradient(circle at 90% 90%, rgba(255, 224, 125, 0.75), transparent 18%),
+					linear-gradient(135deg, #5b49ef 0%, #9fe4d3 54%, #d9d3f4 100%);
+			}
+
+			body::before,
+			body::after {
+				content: "";
+				position: fixed;
+				inset: 0;
+				pointer-events: none;
+				z-index: 0;
+			}
+
+			body::before {
+				background:
+					radial-gradient(circle at 22% 24%, rgba(255, 255, 255, 0.18), transparent 18%),
+					radial-gradient(circle at 78% 78%, rgba(255, 255, 255, 0.16), transparent 16%);
+				filter: blur(10px);
+			}
+
+			body::after {
+				background: linear-gradient(180deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, 0.1));
+			}
+
+			a {
+				color: inherit;
+				text-decoration: none;
+			}
+
+			.page {
+				position: relative;
+				z-index: 1;
+				width: min(1240px, calc(100% - 32px));
+				margin: 36px auto 40px;
+				padding-bottom: 12px;
+				border: 1px solid rgba(255, 255, 255, 0.6);
+				border-radius: 38px;
+				background: var(--surface);
+				backdrop-filter: blur(22px);
+				box-shadow: var(--shadow), inset 0 1px 0 rgba(255, 255, 255, 0.45);
+				overflow: hidden;
+			}
+
+			.page::after {
+				content: "";
+				position: absolute;
+				left: 0;
+				right: 0;
+				bottom: -8px;
+				height: 220px;
+				background: linear-gradient(90deg, rgba(93, 73, 240, 0.18), rgba(92, 228, 214, 0.24), rgba(255, 221, 120, 0.22));
+				filter: blur(54px);
+				opacity: 0.75;
+				pointer-events: none;
+			}
+
+			.topbar {
+				position: relative;
+				z-index: 1;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 18px;
+				padding: 26px 32px 0;
+			}
+
+			.brand {
+				display: inline-flex;
+				align-items: center;
+				gap: 14px;
+				min-width: 0;
+			}
+
+			.brand-mark {
+				flex: 0 0 auto;
+				width: 44px;
+				height: 44px;
+				color: #3158ff;
+				filter: drop-shadow(0 12px 24px rgba(49, 88, 255, 0.28));
+			}
+
+			.brand-mark svg {
+				display: block;
+				width: 100%;
+				height: 100%;
+			}
+
+			.brand-copy {
+				display: grid;
+				gap: 1px;
+				min-width: 0;
+			}
+
+			.brand-copy strong {
+				font-size: 1.1rem;
+				line-height: 1.1;
+				letter-spacing: -0.04em;
+			}
+
+			.brand-copy span {
+				color: var(--muted);
+				font-size: 0.93rem;
+				line-height: 1.2;
+			}
+
+			.nav-links {
+				display: flex;
+				align-items: center;
+				gap: 26px;
+				padding: 0 8px;
+				font-size: 0.95rem;
+				font-weight: 600;
+				color: #1f2937;
+			}
+
+			.nav-links a {
+				position: relative;
+				color: rgba(17, 24, 39, 0.8);
+				transition: color 180ms ease;
+			}
+
+			.nav-links a::after {
+				content: "";
+				position: absolute;
+				left: 0;
+				right: 0;
+				bottom: -10px;
+				height: 2px;
+				border-radius: 999px;
+				background: var(--accent);
+				transform: scaleX(0);
+				transform-origin: center;
+				transition: transform 180ms ease;
+			}
+
+			.nav-links a:hover {
+				color: var(--text);
+			}
+
+			.nav-links a:hover::after {
+				transform: scaleX(1);
+			}
+
+			.nav-cta {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				min-height: 44px;
+				padding: 0 18px;
+				border-radius: 999px;
+				background: linear-gradient(135deg, #4a5bff, #613bff);
+				color: #fff;
+				font-size: 0.96rem;
+				font-weight: 700;
+				letter-spacing: -0.01em;
+				box-shadow: 0 14px 30px rgba(76, 76, 255, 0.28);
+				transition:
+					transform 180ms ease,
+					box-shadow 180ms ease,
+					filter 180ms ease;
+			}
+
+			.nav-cta:hover {
+				transform: translateY(-1px);
+				box-shadow: 0 18px 36px rgba(76, 76, 255, 0.34);
+				filter: saturate(1.03);
+			}
+
+			.hero {
+				position: relative;
+				z-index: 1;
+				display: grid;
+				place-items: center;
+				min-height: 595px;
+				padding: 54px 24px 58px;
+			}
+
+			.hero-inner {
+				position: relative;
+				z-index: 2;
+				width: min(820px, 100%);
+				text-align: center;
+			}
+
+			.hero-pill {
+				display: inline-flex;
+				align-items: center;
+				gap: 10px;
+				padding: 9px 14px;
+				border: 1px solid rgba(17, 24, 39, 0.06);
+				border-radius: 999px;
+				background: rgba(255, 255, 255, 0.82);
+				box-shadow: 0 10px 24px rgba(31, 41, 55, 0.06);
+				color: #344054;
+				font-size: 0.86rem;
+				font-weight: 700;
+			}
+
+			.hero-pill-dot {
+				width: 12px;
+				height: 12px;
+				border-radius: 999px;
+				background: radial-gradient(circle at 35% 35%, #fff, #4f46e5 42%, #2c3bff 100%);
+				box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.12);
+			}
+
+			.hero h1 {
+				margin: 28px 0 0;
+				font-size: clamp(3.2rem, 7.3vw, 6.6rem);
+				line-height: 0.94;
+				letter-spacing: -0.08em;
+				text-wrap: balance;
+			}
+
+			.hero h1 span {
+				background: linear-gradient(90deg, #3f37ff 0%, #5d4cf7 44%, #11b7a4 100%);
+				-webkit-background-clip: text;
+				background-clip: text;
+				color: transparent;
+			}
+
+			.lead {
+				width: min(640px, 100%);
+				margin: 22px auto 0;
+				color: var(--muted-strong);
+				font-size: clamp(1rem, 1.5vw, 1.15rem);
+				line-height: 1.65;
+				text-wrap: balance;
+			}
+
+			.hero-actions {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: center;
+				gap: 14px;
+				margin-top: 30px;
+			}
+
+			.btn {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				gap: 10px;
+				min-height: 52px;
+				padding: 0 22px;
+				border-radius: 16px;
+				font-size: 0.95rem;
+				font-weight: 700;
+				letter-spacing: -0.01em;
+				transition:
+					transform 180ms ease,
+					box-shadow 180ms ease,
+					background-color 180ms ease,
+					border-color 180ms ease;
+			}
+
+			.btn svg {
+				flex: 0 0 auto;
+			}
+
+			.btn-primary {
+				background: #121826;
+				color: #fff;
+				box-shadow: 0 18px 40px rgba(17, 24, 39, 0.22);
+			}
+
+			.btn-primary:hover {
+				transform: translateY(-1px);
+				box-shadow: 0 22px 46px rgba(17, 24, 39, 0.26);
+			}
+
+			.btn-secondary {
+				background: rgba(255, 255, 255, 0.92);
+				border: 1px solid rgba(17, 24, 39, 0.08);
+				color: #1f2937;
+				box-shadow: 0 12px 24px rgba(31, 41, 55, 0.06);
+			}
+
+			.btn-secondary:hover {
+				transform: translateY(-1px);
+				border-color: rgba(17, 24, 39, 0.12);
+			}
+
+			.btn-icon {
+				display: inline-grid;
+				place-items: center;
+				width: 18px;
+				height: 18px;
+				border-radius: 999px;
+				background: rgba(17, 24, 39, 0.08);
+			}
+
+			.hero-badges {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: center;
+				gap: 12px;
+				margin-top: 22px;
+			}
+
+			.hero-badge {
+				display: inline-flex;
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 2px;
+				min-width: 148px;
+				padding: 12px 14px;
+				border: 1px solid rgba(17, 24, 39, 0.06);
+				border-radius: 18px;
+				background: rgba(255, 255, 255, 0.82);
+				box-shadow: 0 12px 24px rgba(31, 41, 55, 0.05);
+			}
+
+			.hero-badge strong {
+				font-size: 0.97rem;
+				line-height: 1.1;
+			}
+
+			.hero-badge span {
+				color: var(--muted);
+				font-size: 0.86rem;
+				line-height: 1.15;
+			}
+
+			.integration {
+				position: absolute;
+				z-index: 0;
+				display: grid;
+				place-items: center;
+				width: 62px;
+				height: 62px;
+				padding: 10px;
+				border: 1px solid rgba(255, 255, 255, 0.7);
+				border-radius: 18px;
+				background: rgba(255, 255, 255, 0.9);
+				box-shadow: 0 22px 36px rgba(31, 41, 55, 0.1);
+				backdrop-filter: blur(10px);
+				animation: float 7s ease-in-out infinite;
+			}
+
+			.integration svg {
+				display: block;
+				width: 100%;
+				height: 100%;
+			}
+
+			.currency-icon {
+				display: grid;
+				place-items: center;
+				width: 100%;
+				height: 100%;
+				border-radius: 14px;
+				font-size: 1.95rem;
+				font-weight: 800;
+				line-height: 1;
+				letter-spacing: -0.08em;
+				text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
+			}
+
+			.currency-icon--inr {
+				color: #0b57d0;
+				background:
+					radial-gradient(circle at 28% 26%, rgba(255, 153, 51, 0.24), transparent 34%),
+					radial-gradient(circle at 72% 74%, rgba(19, 136, 8, 0.18), transparent 36%),
+					linear-gradient(135deg, #ffffff, #edf4ff);
+			}
+
+			.currency-icon--usd {
+				color: #0f7a4d;
+				background:
+					radial-gradient(circle at 28% 26%, rgba(34, 197, 94, 0.18), transparent 34%),
+					linear-gradient(135deg, #ffffff, #ecfbf0);
+			}
+
+			.currency-icon--eur {
+				color: #c2410c;
+				background:
+					radial-gradient(circle at 28% 26%, rgba(251, 191, 36, 0.22), transparent 34%),
+					linear-gradient(135deg, #ffffff, #fff6eb);
+			}
+
+			.currency-icon--gbp {
+				color: #6d28d9;
+				background:
+					radial-gradient(circle at 28% 26%, rgba(167, 139, 250, 0.22), transparent 34%),
+					linear-gradient(135deg, #ffffff, #f4efff);
+			}
+
+			.currency-icon--jpy {
+				color: #b91c1c;
+				background:
+					radial-gradient(circle at 28% 26%, rgba(248, 113, 113, 0.22), transparent 34%),
+					linear-gradient(135deg, #ffffff, #fff0f0);
+			}
+
+			.currency-icon--krw {
+				color: #0f766e;
+				background:
+					radial-gradient(circle at 28% 26%, rgba(45, 212, 191, 0.22), transparent 34%),
+					linear-gradient(135deg, #ffffff, #edfdfb);
+			}
+
+			.integration--inr {
+				top: 140px;
+				left: 108px;
+				animation-delay: 0s;
+			}
+
+			.integration--usd {
+				top: 318px;
+				left: 52px;
+				animation-delay: 0.9s;
+			}
+
+			.integration--eur {
+				bottom: 114px;
+				left: 152px;
+				animation-delay: 0.4s;
+			}
+
+			.integration--gbp {
+				top: 138px;
+				right: 110px;
+				animation-delay: 0.5s;
+			}
+
+			.integration--jpy {
+				top: 308px;
+				right: 52px;
+				animation-delay: 1.05s;
+			}
+
+			.integration--krw {
+				bottom: 118px;
+				right: 158px;
+				animation-delay: 0.25s;
+			}
+
+			.preview {
+				position: relative;
+				z-index: 1;
+				padding: 0 24px 26px;
+			}
+
+			.preview-card {
+				position: relative;
+				padding: 26px;
+				border: 1px solid rgba(255, 255, 255, 0.7);
+				border-radius: 30px;
+				background: rgba(255, 255, 255, 0.78);
+				box-shadow: 0 26px 60px rgba(32, 36, 82, 0.12);
+				overflow: hidden;
+			}
+
+			.preview-card::before {
+				content: "";
+				position: absolute;
+				inset: auto 0 0;
+				height: 120px;
+				background: linear-gradient(90deg, rgba(93, 73, 240, 0.14), rgba(120, 225, 221, 0.2), rgba(255, 220, 122, 0.18));
+				filter: blur(40px);
+				opacity: 0.8;
+				pointer-events: none;
+			}
+
+			.preview-head {
+				position: relative;
+				z-index: 1;
+				display: flex;
+				align-items: flex-end;
+				justify-content: space-between;
+				gap: 18px;
+			}
+
+			.kicker {
+				margin: 0;
+				color: var(--accent);
+				font-size: 0.82rem;
+				font-weight: 800;
+				letter-spacing: 0.18em;
+				text-transform: uppercase;
+			}
+
+			.preview-head h2 {
+				margin: 8px 0 0;
+				font-size: clamp(1.7rem, 2.7vw, 2.7rem);
+				line-height: 1.04;
+				letter-spacing: -0.05em;
+			}
+
+			.preview-copy {
+				width: min(390px, 100%);
+				margin: 0;
+				color: var(--muted-strong);
+				font-size: 0.98rem;
+				line-height: 1.7;
+			}
+
+			.dashboard-shot {
+				position: relative;
+				z-index: 1;
+				margin: 24px 0 0;
+				border: 1px solid rgba(17, 24, 39, 0.05);
+				border-radius: 24px;
+				overflow: hidden;
+				background: #fff;
+				box-shadow: 0 18px 40px rgba(31, 41, 55, 0.12);
+			}
+
+			.dashboard-shot img {
+				display: block;
+				width: 100%;
+				height: auto;
+			}
+
+			.demo {
+				position: relative;
+				z-index: 1;
+				padding: 0 24px 28px;
+			}
+
+			.demo-card {
+				position: relative;
+				display: grid;
+				grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+				gap: 20px;
+				padding: 24px;
+				border: 1px solid rgba(255, 255, 255, 0.7);
+				border-radius: 30px;
+				background: rgba(255, 255, 255, 0.78);
+				box-shadow: 0 26px 60px rgba(32, 36, 82, 0.12);
+				overflow: hidden;
+			}
+
+			.demo-card::before {
+				content: "";
+				position: absolute;
+				inset: auto 0 0;
+				height: 140px;
+				background: linear-gradient(90deg, rgba(93, 73, 240, 0.14), rgba(120, 225, 221, 0.2), rgba(255, 220, 122, 0.18));
+				filter: blur(42px);
+				opacity: 0.75;
+				pointer-events: none;
+			}
+
+			.demo-copy {
+				position: relative;
+				z-index: 1;
+				display: grid;
+				align-content: start;
+				gap: 18px;
+				padding: 4px 6px 4px 0;
+			}
+
+			.demo-copy h2 {
+				margin: 0;
+				font-size: clamp(1.7rem, 2.8vw, 2.6rem);
+				line-height: 1.05;
+				letter-spacing: -0.05em;
+			}
+
+			.demo-text {
+				margin: 0;
+				color: var(--muted-strong);
+				font-size: 0.98rem;
+				line-height: 1.7;
+			}
+
+			.demo-actions {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 12px;
+				align-items: center;
+			}
+
+			.demo-note {
+				color: var(--muted);
+				font-size: 0.9rem;
+				line-height: 1.5;
+			}
+
+			.demo-player {
+				position: relative;
+				z-index: 1;
+				overflow: hidden;
+				border: 1px solid rgba(17, 24, 39, 0.05);
+				border-radius: 24px;
+				background: #0f172a;
+				box-shadow: 0 18px 40px rgba(31, 41, 55, 0.12);
+			}
+
+			.demo-player iframe {
+				display: block;
+				width: 100%;
+				aspect-ratio: 16 / 9;
+				border: 0;
+			}
+
+			.features {
+				position: relative;
+				z-index: 1;
+				display: grid;
+				grid-template-columns: repeat(3, minmax(0, 1fr));
+				gap: 16px;
+				padding: 0 24px 28px;
+			}
+
+			.feature-card {
+				padding: 22px;
+				border: 1px solid rgba(255, 255, 255, 0.62);
+				border-radius: 24px;
+				background: rgba(255, 255, 255, 0.66);
+				box-shadow: var(--shadow-soft);
+			}
+
+			.feature-index {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				width: 42px;
+				height: 42px;
+				margin: 0 0 16px;
+				border-radius: 14px;
+				background: linear-gradient(135deg, rgba(79, 70, 229, 0.12), rgba(17, 183, 164, 0.12));
+				color: #3841c4;
+				font-size: 0.92rem;
+				font-weight: 800;
+			}
+
+			.feature-card h3 {
+				margin: 0 0 10px;
+				font-size: 1.1rem;
+				line-height: 1.15;
+				letter-spacing: -0.04em;
+			}
+
+			.feature-card p {
+				margin: 0;
+				color: var(--muted-strong);
+				font-size: 0.96rem;
+				line-height: 1.7;
+			}
+
+			.info-section {
+				position: relative;
+				z-index: 1;
+				padding: 0 24px 28px;
+			}
+
+			.info-shell {
+				position: relative;
+				overflow: hidden;
+				padding: 24px;
+				border: 1px solid rgba(255, 255, 255, 0.7);
+				border-radius: 30px;
+				background: rgba(255, 255, 255, 0.78);
+				box-shadow: 0 26px 60px rgba(32, 36, 82, 0.12);
+			}
+
+			.info-shell::before {
+				content: "";
+				position: absolute;
+				inset: auto 0 0;
+				height: 130px;
+				background: linear-gradient(90deg, rgba(93, 73, 240, 0.12), rgba(120, 225, 221, 0.16), rgba(255, 220, 122, 0.14));
+				filter: blur(42px);
+				opacity: 0.75;
+				pointer-events: none;
+			}
+
+			.info-head {
+				position: relative;
+				z-index: 1;
+				display: flex;
+				align-items: flex-end;
+				justify-content: space-between;
+				gap: 18px;
+				margin-bottom: 18px;
+			}
+
+			.info-head h2 {
+				margin: 8px 0 0;
+				font-size: clamp(1.55rem, 2.5vw, 2.3rem);
+				line-height: 1.06;
+				letter-spacing: -0.05em;
+			}
+
+			.info-head p {
+				width: min(560px, 100%);
+				margin: 0;
+				color: var(--muted-strong);
+				font-size: 0.95rem;
+				line-height: 1.7;
+			}
+
+			.info-grid {
+				position: relative;
+				z-index: 1;
+				display: grid;
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+				gap: 16px;
+			}
+
+			.info-card {
+				padding: 20px;
+				border: 1px solid rgba(17, 24, 39, 0.06);
+				border-radius: 22px;
+				background: rgba(255, 255, 255, 0.68);
+				box-shadow: var(--shadow-soft);
+			}
+
+			.info-card h3 {
+				margin: 0 0 10px;
+				font-size: 1.03rem;
+				line-height: 1.15;
+				letter-spacing: -0.04em;
+			}
+
+			.info-card p {
+				margin: 0;
+				color: var(--muted-strong);
+				font-size: 0.94rem;
+				line-height: 1.7;
+			}
+
+			.info-list {
+				margin: 0;
+				padding-left: 18px;
+				display: grid;
+				gap: 10px;
+				color: var(--muted-strong);
+				font-size: 0.94rem;
+				line-height: 1.7;
+			}
+
+			.inline-code {
+				display: inline-flex;
+				align-items: center;
+				padding: 2px 8px;
+				border-radius: 999px;
+				background: rgba(79, 70, 229, 0.1);
+				color: #3141c5;
+				font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, monospace;
+				font-size: 0.86rem;
+				font-weight: 700;
+				white-space: nowrap;
+			}
+
+			.setup-note {
+				position: relative;
+				z-index: 1;
+				margin-top: 16px;
+				padding: 14px 16px;
+				border: 1px dashed rgba(79, 70, 229, 0.24);
+				border-radius: 18px;
+				background: rgba(79, 70, 229, 0.08);
+				color: #334155;
+				font-size: 0.92rem;
+				line-height: 1.65;
+			}
+
+			.work-grid {
+				position: relative;
+				z-index: 1;
+				display: grid;
+				gap: 14px;
+			}
+
+			.work-card {
+				display: grid;
+				grid-template-columns: auto 1fr;
+				gap: 16px;
+				align-items: start;
+				padding: 20px;
+				border: 1px solid rgba(17, 24, 39, 0.06);
+				border-radius: 22px;
+				background: rgba(255, 255, 255, 0.68);
+				box-shadow: var(--shadow-soft);
+			}
+
+			.work-step {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				width: 48px;
+				height: 48px;
+				border-radius: 16px;
+				background: linear-gradient(135deg, rgba(79, 70, 229, 0.14), rgba(17, 183, 164, 0.14));
+				color: #3841c4;
+				font-size: 1rem;
+				font-weight: 800;
+				letter-spacing: -0.04em;
+				box-shadow: 0 14px 28px rgba(79, 70, 229, 0.12);
+			}
+
+			.work-card h3 {
+				margin: 0 0 8px;
+				font-size: 1.05rem;
+				line-height: 1.15;
+				letter-spacing: -0.04em;
+			}
+
+			.work-card p {
+				margin: 0;
+				color: var(--muted-strong);
+				font-size: 0.94rem;
+				line-height: 1.7;
+			}
+
+			.footer {
+				position: relative;
+				z-index: 1;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 16px;
+				padding: 0 24px 34px;
+				color: var(--muted);
+				font-size: 0.92rem;
+			}
+
+			.footer a {
+				font-weight: 800;
+				color: #2b4ef2;
+			}
+
+			.footer a:hover {
+				text-decoration: underline;
+				text-decoration-thickness: 2px;
+				text-underline-offset: 3px;
+			}
+
+			@keyframes float {
+				0%,
+				100% {
+					transform: translateY(0);
+				}
+				50% {
+					transform: translateY(-10px);
+				}
+			}
+
+			@media (prefers-reduced-motion: reduce) {
+				html {
+					scroll-behavior: auto;
+				}
+
+				*,
+				*::before,
+				*::after {
+					animation-duration: 0.001ms !important;
+					animation-iteration-count: 1 !important;
+					transition-duration: 0.001ms !important;
+				}
+			}
+
+			@media (max-width: 1120px) {
+				.integration--inr {
+					left: 40px;
+				}
+
+				.integration--usd {
+					left: 18px;
+				}
+
+				.integration--eur {
+					left: 78px;
+				}
+
+				.integration--gbp {
+					right: 40px;
+				}
+
+				.integration--jpy {
+					right: 18px;
+				}
+
+				.integration--krw {
+					right: 78px;
+				}
+			}
+
+			@media (max-width: 960px) {
+				.page {
+					width: min(1240px, calc(100% - 18px));
+					margin: 12px auto 18px;
+					border-radius: 28px;
+				}
+
+				.topbar {
+					flex-wrap: wrap;
+					padding: 20px 18px 0;
+				}
+
+				.nav-links {
+					order: 3;
+					width: 100%;
+					justify-content: center;
+					gap: 18px;
+					padding: 12px 0 0;
+					font-size: 0.92rem;
+				}
+
+				.hero {
+					min-height: auto;
+					padding: 44px 18px 30px;
+				}
+
+				.integration {
+					display: none;
+				}
+
+				.hero h1 {
+					font-size: clamp(2.9rem, 9vw, 5rem);
+				}
+
+				.preview {
+					padding: 0 18px 22px;
+				}
+
+				.preview-card {
+					padding: 18px;
+				}
+
+				.preview-head {
+					align-items: flex-start;
+					flex-direction: column;
+				}
+
+				.demo {
+					padding: 0 18px 22px;
+				}
+
+				.demo-card {
+					grid-template-columns: 1fr;
+					padding: 18px;
+				}
+
+				.features {
+					grid-template-columns: 1fr;
+					padding: 0 18px 22px;
+				}
+
+				.info-section {
+					padding: 0 18px 22px;
+				}
+
+				.info-shell {
+					padding: 18px;
+				}
+
+				.info-head {
+					align-items: flex-start;
+					flex-direction: column;
+				}
+
+				.info-grid {
+					grid-template-columns: 1fr;
+				}
+
+				.work-card {
+					padding: 18px;
+				}
+
+				.footer {
+					flex-direction: column;
+					align-items: flex-start;
+					padding: 0 18px 26px;
+				}
+			}
+
+			@media (max-width: 620px) {
+				.page {
+					width: calc(100% - 12px);
+					margin: 6px auto 12px;
+					border-radius: 24px;
+				}
+
+				.brand-copy span {
+					font-size: 0.82rem;
+				}
+
+				.hero {
+					padding-top: 36px;
+				}
+
+				.hero-pill {
+					font-size: 0.8rem;
+				}
+
+				.hero-actions {
+					flex-direction: column;
+					align-items: stretch;
+				}
+
+				.btn {
+					width: 100%;
+				}
+
+				.hero-badge {
+					min-width: calc(50% - 6px);
+					flex: 1 1 0;
+				}
+
+				.preview-head h2 {
+					font-size: clamp(1.45rem, 7vw, 2rem);
+				}
+			}
+		</style>
 	</head>
 	<body>
-		<h1 id="heading"></h1>
-		<script>
-			fetch('/message')
-				.then((resp) => resp.text())
-				.then((text) => {
-					const h1 = document.getElementById('heading');
-					h1.textContent = text;
-				});
-		</script>
+		<main class="page">
+			<header class="topbar">
+				<a class="brand" href="#hero" aria-label="UPI Gateway home">
+					<span class="brand-mark" aria-hidden="true">
+						<svg viewBox="0 0 48 48" role="img" aria-hidden="true">
+							<rect x="4" y="4" width="40" height="40" rx="14" fill="currentColor" />
+							<rect x="12" y="18" width="20" height="12" rx="6" fill="#ffffff" />
+							<rect x="22" y="18" width="12" height="12" rx="6" fill="#dfe7ff" />
+						</svg>
+					</span>
+					<span class="brand-copy">
+						<strong>UPI Gateway</strong>
+						<span>Payment operations control tower</span>
+					</span>
+				</a>
+
+				<nav class="nav-links" aria-label="Primary">
+					<a href="#hero">Home</a>
+					<a href="#preview">Dashboard</a>
+					<a href="#demo">Demo</a>
+					<a href="#features">Features</a>
+					<a href="#working">Working</a>
+					<a href="#contact">Contact</a>
+				</nav>
+
+				<a
+					class="nav-cta"
+					href="https://api.whatsapp.com/send?phone=919544047655&text=setup%20payment%20gateway"
+					rel="noreferrer"
+				>
+					Get Started
+				</a>
+			</header>
+
+			<section class="hero" id="hero">
+				<div class="integration integration--inr" aria-hidden="true">
+					<span class="currency-icon currency-icon--inr" aria-hidden="true">₹</span>
+				</div>
+
+				<div class="integration integration--usd" aria-hidden="true">
+					<span class="currency-icon currency-icon--usd" aria-hidden="true">$</span>
+				</div>
+
+				<div class="integration integration--eur" aria-hidden="true">
+					<span class="currency-icon currency-icon--eur" aria-hidden="true">€</span>
+				</div>
+
+				<div class="integration integration--gbp" aria-hidden="true">
+					<span class="currency-icon currency-icon--gbp" aria-hidden="true">£</span>
+				</div>
+
+				<div class="integration integration--jpy" aria-hidden="true">
+					<span class="currency-icon currency-icon--jpy" aria-hidden="true">¥</span>
+				</div>
+
+				<div class="integration integration--krw" aria-hidden="true">
+					<span class="currency-icon currency-icon--krw" aria-hidden="true">₩</span>
+				</div>
+
+				<div class="hero-inner">
+					<div class="hero-pill">
+						<span class="hero-pill-dot" aria-hidden="true"></span>
+						<span>Built for individual Slice UPI setups</span>
+					</div>
+
+					<h1>Self-host your <span>payment gateway</span></h1>
+
+					<p class="lead">
+						Launch UPI payment links, keep orders in sync, and push webhook updates from a single dashboard.
+						Zero commission, instant settlement, and real-time auto verification.
+						Built for individual Slice UPI accounts.
+					</p>
+
+					<div class="hero-actions">
+						<a
+							class="btn btn-primary"
+							href="https://api.whatsapp.com/send?phone=919544047655&text=setup%20payment%20gateway"
+							rel="noreferrer"
+						>
+							<span>Start Building</span>
+							<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+								<path d="M5 12h11" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+								<path d="M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+							</svg>
+						</a>
+
+						<a class="btn btn-secondary" href="#preview">
+							<span class="btn-icon" aria-hidden="true">
+								<svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+									<path d="M3 2.3v5.4L7.5 5 3 2.3Z" fill="currentColor" />
+								</svg>
+							</span>
+							<span>View Dashboard</span>
+						</a>
+					</div>
+
+					<div class="hero-badges" aria-label="Product highlights">
+						<div class="hero-badge">
+							<strong>Individual</strong>
+							<span>account only</span>
+						</div>
+						<div class="hero-badge">
+							<strong>Live</strong>
+							<span>webhook sync</span>
+						</div>
+						<div class="hero-badge">
+							<strong>Fast</strong>
+							<span>setup in minutes</span>
+						</div>
+					</div>
+				</div>
+			</section>
+
+			<section class="preview" id="preview">
+				<div class="preview-card">
+					<div class="preview-head">
+						<div>
+							<p class="kicker">Dashboard screenshot</p>
+							<h2>See every payment move in one place</h2>
+						</div>
+						<p class="preview-copy">
+							Orders, success rates, and the payment ledger stay visible in one calm,
+							operator-friendly view.
+						</p>
+					</div>
+
+					<figure class="dashboard-shot">
+						<img
+							src="/screendash.png"
+							alt="UPI Gateway dashboard screenshot"
+							width="1918"
+							height="925"
+							decoding="async"
+						/>
+					</figure>
+				</div>
+			</section>
+
+			<section class="demo" id="demo">
+				<div class="demo-card">
+					<div class="demo-copy">
+						<p class="kicker">Demo video</p>
+						<h2>Watch the gateway flow in action</h2>
+						<p class="demo-text">
+							See how the dashboard, order updates, and payment tracking work together in a short walkthrough
+							of the live experience.
+						</p>
+						<div class="demo-actions">
+							<a
+								class="btn btn-primary"
+								href="https://youtu.be/43BpRzuCQZo"
+								target="_blank"
+								rel="noreferrer"
+							>
+								<span>Open on YouTube</span>
+								<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+									<path d="M5 12h11" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+									<path d="M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+								</svg>
+							</a>
+							<span class="demo-note">Embedded player is right beside it for quick viewing.</span>
+						</div>
+					</div>
+
+					<div class="demo-player">
+						<iframe
+							src="https://www.youtube.com/embed/43BpRzuCQZo?rel=0&modestbranding=1"
+							title="UPI Gateway demo video"
+							loading="lazy"
+							allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+							referrerpolicy="strict-origin-when-cross-origin"
+							allowfullscreen
+						></iframe>
+					</div>
+				</div>
+			</section>
+
+			<section class="features" id="features">
+				<article class="feature-card">
+					<div class="feature-index">01</div>
+					<h3>Zero commission</h3>
+					<p>
+						Keep more of every payment. Your customers pay through UPI, and the gateway does not add an extra
+						platform cut on top of the transaction.
+					</p>
+				</article>
+
+				<article class="feature-card">
+					<div class="feature-index">02</div>
+					<h3>Instant settlement</h3>
+					<p>
+						Payments move directly into your connected Slice UPI flow, helping you avoid long payout cycles and
+						keep cash flow moving quickly.
+					</p>
+				</article>
+
+				<article class="feature-card">
+					<div class="feature-index">03</div>
+					<h3>Real-time auto verification</h3>
+					<p>
+						Incoming payments are checked automatically and matched to orders in real time, so your dashboard
+						can mark success without manual refreshes.
+					</p>
+				</article>
+			</section>
+
+			<section class="info-section" id="api">
+				<div class="info-shell">
+					<div class="info-head">
+						<div>
+							<p class="kicker">Developer notes</p>
+							<h2>Main API calls and webhook flow</h2>
+						</div>
+						<p>
+							A compact reference for the endpoints, the webhook-style email verification flow, and the secret
+							used to protect sensitive routes.
+						</p>
+					</div>
+
+					<div class="info-grid">
+						<article class="info-card">
+							<h3>Core API calls</h3>
+							<ul class="info-list">
+								<li><code class="inline-code">POST /api/create-order</code> creates a new payment request for an amount.</li>
+								<li><code class="inline-code">GET /api/order/:id</code> checks the current status of one order.</li>
+								<li><code class="inline-code">POST /api/timeout-orders</code> marks waiting orders older than 10 minutes as timeout.</li>
+								<li><code class="inline-code">POST /api/test-webhook</code> sends a test webhook event.</li>
+							</ul>
+						</article>
+
+						<article class="info-card">
+							<h3>Webhook and secrets</h3>
+							<p>
+								The worker listens for Slice payment emails, extracts the payment details, and matches the
+								transaction to the oldest waiting order with the same amount. Protected API routes expect
+								<code class="inline-code">Authorization: Bearer &lt;api_secret&gt;</code>, and the KV namespace stores
+								<code class="inline-code">api_secret</code>, <code class="inline-code">upi_id</code>,
+								<code class="inline-code">webhook_url</code>, and <code class="inline-code">webhook_secret</code>.
+							</p>
+						</article>
+					</div>
+				</div>
+			</section>
+
+			<section class="info-section" id="cloudflare">
+				<div class="info-shell">
+					<div class="info-head">
+						<div>
+							<p class="kicker">Cloudflare setup</p>
+							<h2>Two bindings you need in Cloudflare</h2>
+						</div>
+						<p>
+							These are the two runtime pieces the worker needs before the API, dashboard, and payment checks
+							can work together.
+						</p>
+					</div>
+
+					<div class="info-grid">
+						<article class="info-card">
+							<h3>1. D1 database</h3>
+							<p>
+								Bind the production D1 database as
+								<code class="inline-code">prod_d1_db_slice_upi_gateway</code> so orders, payments, and logs can be
+								stored and queried.
+							</p>
+						</article>
+
+						<article class="info-card">
+							<h3>2. KV namespace</h3>
+							<p>
+								Bind <code class="inline-code">sclice_upi_gateway_namespace</code> and save the runtime config
+								keys used by the worker and dashboard.
+							</p>
+						</article>
+					</div>
+
+					<div class="setup-note">
+						If you want automatic payment email ingestion, also enable Cloudflare email routing or the Worker
+						email trigger for the inbox that receives Slice notifications.
+					</div>
+				</div>
+			</section>
+
+			<section class="info-section" id="working">
+				<div class="info-shell">
+					<div class="info-head">
+						<div>
+							<p class="kicker">Working</p>
+							<h2>How the flow works end to end</h2>
+						</div>
+						<p>
+							A step-by-step guide from setup to live payment verification, written so the whole flow is easy to
+							scan and hand off to your team.
+						</p>
+					</div>
+
+					<div class="work-grid">
+						<article class="work-card">
+							<div class="work-step">1</div>
+							<div>
+								<h3>Buy a domain and link to Cloudflare</h3>
+								<p>
+									Start with a branded domain for your gateway, then add it to Cloudflare DNS so you can route
+									traffic securely through the worker and keep TLS, proxying, and hostname management in one
+									place.
+								</p>
+							</div>
+						</article>
+
+						<article class="work-card">
+							<div class="work-step">2</div>
+							<div>
+								<h3>Create an email route to the Worker in Cloudflare</h3>
+								<p>
+									Set up Cloudflare Email Routing or a Worker email trigger so Slice payment notifications arrive
+									at your worker automatically. That is what lets the gateway inspect incoming messages without a
+									manual inbox process.
+								</p>
+							</div>
+						</article>
+
+						<article class="work-card">
+							<div class="work-step">3</div>
+							<div>
+								<h3>Create a Slice UPI account and link that email</h3>
+								<p>
+									Open the Slice UPI account you want to receive payments on, then connect the notification email
+									that will receive transaction alerts. The worker relies on those emails to read payer details,
+									amounts, and timing.
+								</p>
+							</div>
+						</article>
+
+						<article class="work-card">
+							<div class="work-step">4</div>
+							<div>
+								<h3>Create a Cloudflare Worker and D1 database in Cloudflare</h3>
+								<p>
+									Deploy the worker that handles API calls, email parsing, and webhook dispatch, then attach a D1
+									database so orders, payments, and status changes can be stored reliably and shown in the
+									dashboard.
+								</p>
+							</div>
+						</article>
+
+						<article class="work-card">
+							<div class="work-step">5</div>
+							<div>
+								<h3>Integrate it to your apps</h3>
+								<p>
+									Use the create-order endpoint in your checkout or app, listen for webhook updates, and refresh
+									order status from your frontend, bot, or backend so payments move from pending to success
+									automatically.
+								</p>
+							</div>
+						</article>
+					</div>
+				</div>
+			</section>
+
+			<footer class="footer" id="contact">
+				<span>Need help launching?</span>
+				<a
+					href="https://api.whatsapp.com/send?phone=919544047655&text=setup%20payment%20gateway"
+					rel="noreferrer"
+				>
+					Chat on WhatsApp
+				</a>
+			</footer>
+		</main>
 	</body>
 </html>

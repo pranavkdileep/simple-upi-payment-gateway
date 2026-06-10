@@ -1,5 +1,7 @@
 # Slice UPI Gateway
 
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/pranavkdileep/simple-upi-payment-gateway)
+
 Cloudflare Worker based UPI payment gateway for Slice bank credit notification emails.
 
 It creates short-lived UPI payment orders, assigns collision-free payable amounts, listens for Slice bank email notifications, matches incoming payments to waiting orders, updates order state in D1, and sends webhooks to your application.
